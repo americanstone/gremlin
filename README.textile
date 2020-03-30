@@ -1,5 +1,8 @@
 !https://github.com/tinkerpop/gremlin/raw/master/doc/images/gremlin-logo.png!
 
+<a href="http://tinkerpop.apache.org"><img alt="" height="170" src="https://raw.githubusercontent.com/apache/incubator-tinkerpop/master/docs/static/images/not-tinkerpop3-gremlin.png" /></a>
+
+*IMPORTANT* - TinkerPop is now a part of the Apache Software Foundation and "TinkerPop 3.x":http://tinkerpop.apache.org/ is the latest incarnation of The TinkerPop.  This project is TinkerPop 2.x and is no longer active.  
 
 Gremlin is a domain specific language for traversing property "graphs":http://en.wikipedia.org/wiki/Graph_%28mathematics%29. Gremlin makes use of "Pipes":http://pipes.tinkerpop.com to perform complex graph traversals. This language has application in the areas of graph query, analysis, and manipulation. Connectors, provided by "Blueprints":http://blueprints.tinkerpop.com, exist for the following graph management systems:
 
@@ -7,7 +10,7 @@ Gremlin is a domain specific language for traversing property "graphs":http://en
 ** "TinkerGraph":https://github.com/tinkerpop/blueprints/wiki/TinkerGraph in-memory graph
 ** "Neo4j":http://neo4j.org/ graph database
 ** "OrientDB":http://www.orientechnologies.com/ graph database
-** "DEX":http://www.sparsity-technologies.com/dex graph database
+** "Sparksee":http://www.sparsity-technologies.com/#sparksee graph database
 ** "Titan":http://thinkaurelius.github.com/titan/ graph database
 ** "Faunus":http://thinkaurelius.github.com/faunus/ graph analytics engine
 ** "InfiniteGraph":http://www.objectivity.com/products/infinitegraph/ graph database

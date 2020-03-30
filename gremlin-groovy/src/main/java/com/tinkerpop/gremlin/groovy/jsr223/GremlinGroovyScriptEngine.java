@@ -66,10 +66,22 @@ public class GremlinGroovyScriptEngine extends GroovyScriptEngineImpl {
         this.cacheResetSize = cacheResetSize;
     }
 
+    public GremlinGroovyScriptEngine(String scripBaseClass) {
+        this(scripBaseClass, new DefaultImportCustomizerProvider());
+    }
+
     public GremlinGroovyScriptEngine(final ImportCustomizerProvider importCustomizerProvider) {
+        this(null, importCustomizerProvider);
+    }
+
+    public GremlinGroovyScriptEngine(String scriptBaseClass, final ImportCustomizerProvider importCustomizerProvider) {
         Gremlin.load();
         final CompilerConfiguration conf = new CompilerConfiguration();
+        if (scriptBaseClass != null) {
+            conf.setScriptBaseClass(scriptBaseClass);
+        }
         conf.addCompilationCustomizers(importCustomizerProvider.getImportCustomizer());
+        conf.setSourceEncoding("UTF-8");
         this.loader = new GroovyClassLoader(getParentLoader(), conf);
     }
 
@@ -227,7 +239,7 @@ public class GremlinGroovyScriptEngine extends GroovyScriptEngineImpl {
         if (clazz != null) {
             return clazz;
         } else {
-            java.io.InputStream stream = new ByteArrayInputStream(script.getBytes());
+            java.io.InputStream stream = new ByteArrayInputStream(script.getBytes("UTF-8"));
             clazz = loader.parseClass(stream, generateScriptName());
             classMap.put(script, clazz);
             return clazz;

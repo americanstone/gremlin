@@ -1,18 +1,20 @@
 package com.tinkerpop.gremlin.groovy.jsr223;
 
 import com.tinkerpop.blueprints.Graph;
+import com.tinkerpop.blueprints.Index;
+import com.tinkerpop.blueprints.Vertex;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraph;
 import com.tinkerpop.blueprints.impls.tg.TinkerGraphFactory;
+import com.tinkerpop.pipes.util.Pipeline;
+import junit.framework.Assert;
 import junit.framework.TestCase;
 
 import javax.script.Bindings;
 import javax.script.CompiledScript;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.nio.channels.Pipe;
+import java.util.*;
 import java.util.concurrent.CountDownLatch;
 
 /**
@@ -287,5 +289,61 @@ public class GremlinGroovyScriptEngineTest extends TestCase {
 
         // make sure the class works on its own...this generates: groovy.lang.MissingPropertyException: No such property: c for class: Script2
         assertEquals(true, engine.eval("c.isVadas(g.v(2))", bindings));
+    }
+
+    public void testGremlinScriptEngineWithScriptBaseClass() throws Exception {
+        ScriptEngine engine = new GremlinGroovyScriptEngine();
+        List list = new ArrayList();
+        engine.put("g", TinkerGraphFactory.createTinkerGraph());
+        engine.put("list", list);
+        assertEquals(list.size(), 0);
+        engine.eval("g.V.fill(list)");
+        assertEquals(6, list.size());
+
+        list.clear();
+        TinkerGraph tinkerGraph = TinkerGraphFactory.createTinkerGraph();
+        Vertex marko = tinkerGraph.getVertex(1L);
+        Assert.assertEquals("marko", marko.getProperty("name"));
+        marko.setProperty("deleted", new Date());
+
+        engine = new GremlinGroovyScriptEngine("com.tinkerpop.gremlin.groovy.basescript.GremlinGroovyScriptBaseClassForTest");
+        engine.put("g", tinkerGraph);
+        engine.put("list", list);
+        assertEquals(list.size(), 0);
+        String groovy = "g.V.fill(list)";
+        groovy = "useInterceptor( GremlinGroovyPipeline, com.tinkerpop.gremlin.groovy.basescript.GremlinGroovyPipelineInterceptor) {" + groovy + "}";
+        engine.eval(groovy);
+        assertEquals(5, list.size());
+    }
+
+    public void testGremlinScriptEngineWithUTF8Characters() throws Exception {
+        ScriptEngine engine = new GremlinGroovyScriptEngine();
+        assertEquals("轉注", engine.eval("'轉注'"));
+    }
+
+    public void testUTF8Query() throws Exception {
+        TinkerGraph graph = new TinkerGraph();
+        Index<Vertex> index = graph.createIndex("nodes", Vertex.class);
+
+        Vertex nonUtf8 = graph.addVertex("1");
+        nonUtf8.setProperty("name", "marko");
+        nonUtf8.setProperty("age", 29);
+        index.put("name", "marko", nonUtf8);
+
+        Vertex utf8Name = graph.addVertex("2");
+        utf8Name.setProperty("name", "轉注");
+        utf8Name.setProperty("age", 32);
+        index.put("name", "轉注", utf8Name);
+        graph.addVertex(utf8Name);
+
+        graph.addEdge("12", nonUtf8, utf8Name, "created").setProperty("weight", 0.2f);
+
+        ScriptEngine engine = new GremlinGroovyScriptEngine();
+
+        engine.put("g", graph);
+        Pipeline eval = (Pipeline) engine.eval("g.idx(\"nodes\")[['name' : 'marko']]");
+        assertEquals(nonUtf8, eval.next());
+        eval = (Pipeline) engine.eval("g.idx(\"nodes\")[['name' : '轉注']]");
+        assertEquals(utf8Name, eval.next());
     }
 }

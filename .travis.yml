@@ -1,8 +1,4 @@
 language: java
-notifications:
-  email:
-    - okrammarko@gmail.com
-    - spmallette@gmail.com
 jdk:
   - oraclejdk7
   - openjdk7
